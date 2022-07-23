@@ -18,7 +18,12 @@ let drawCanvas = () => {
     svg.attr("height", height);
 };
 
-
+let createTooltip = () => {
+    return d3.select("body")
+             .append("div")
+             .style("opacity", 0)
+             .attr("id", "tooltip");
+}
 
 let generateScales = () => {
         xScale = d3.scaleLinear()
@@ -70,24 +75,30 @@ let drawPoints = () => {
                     return "lightgreen"
                 }
             })
+
             .on("mouseover", (e, item) => {
-                tooltip.transition()
-                        .style("visibility", "visible")                        
-                        if (item["Doping"] !== "") {
-                            tooltip.text(item["Year"] + " - " + item["Name"] + " - " + item["Time"] + " - " + item["Doping"])
+                
+                d3.select("#tooltip")
+                    .style("opacity", 0.85)
+                    .style("left", e.pageX + 10 + "px")
+                    .style("top", e.pageY + 28 + "px")
+                    .html(
+                        item["Doping"] !== "" ?  `${item["Year"]} - ${item["Name"]} - ${item["Time"]} - ${item["Doping"]}` :
+                                                    `${item["Year"]} - ${item["Name"]} - ${item["Time"]} - No Allegations`
+                     )
+                    .attr("data-year", item["Year"])
 
-                          
-                        } else {
-                            tooltip.text(item["Year"] + " - " + 
-                                         item["Name"] + " - " + item["Time"] + " - " + "No Allegations")
-                        }
-                        tooltip.attr("data-year", item["Year"])
-
+    
             })
+    
             .on("mouseout", (e, item) => {
-                tooltip.transition()
-                        .style("visibility", "hidden")
+                return d3.select("#tooltip")
+                            .style("opacity", 0)
+                            .style("left", 0)
+                            .style("top", 0)
             })
+
+
 };
 
 let generateAxes = () => {
@@ -115,6 +126,7 @@ req.onload = () => {
         generateScales();
         drawPoints();
         generateAxes();
+        createTooltip();
 };
 
 req.send();
